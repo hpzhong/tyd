@@ -7,10 +7,12 @@
  */
 #include <linux/module.h>
 #include <linux/init.h>
+//#include <linux/random.h>
 
 int __init init_module(void)
 {
 	printk("module init!\n");
+//	printk("ramd=%d\n",get_random_int());
 	return 0;
 }
 void __exit cleanup_module(void)
