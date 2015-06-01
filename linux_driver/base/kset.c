@@ -119,8 +119,10 @@ static struct kset_uevent_ops uevent_ops =
 static struct kset *kset_parent;
 static struct kset kset_child;
 
+
 int init_module(void)
 {
+	char *envp[2] = {"AUTHOR=kabir", NULL};
 	printk("kset test init.\n");
 	kset_parent = kset_create_and_add("kset_parent", &uevent_ops, NULL);
 	my_kobj.kobj.kset = kset_parent;
@@ -130,6 +132,7 @@ int init_module(void)
 	kset_child.kobj.kset = kset_parent;
 	kset_child.kobj.ktype = &ktype;
 	kset_register(&kset_child);
+	kobject_uevent_env(&my_kobj.kobj, KOBJ_ADD, envp);
 	return 0;
 }
 
