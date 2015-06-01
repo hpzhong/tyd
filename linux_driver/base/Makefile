@@ -1,4 +1,4 @@
-obj-m := kobject.o rand.o module_sample.o init_sample.o
+obj-m := kobject.o rand.o module_sample.o init_sample.o kset.o
 all: 
 	@make  -j8 --no-print-directory -C /lib/modules/${shell uname -r}/build/ M=`pwd` modules
 

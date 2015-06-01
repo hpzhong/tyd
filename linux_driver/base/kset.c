@@ -117,12 +117,19 @@ static struct kset_uevent_ops uevent_ops =
 };
  
 static struct kset *kset_parent;
+static struct kset kset_child;
+
 int init_module(void)
 {
 	printk("kset test init.\n");
 	kset_parent = kset_create_and_add("kset_parent", &uevent_ops, NULL);
 	my_kobj.kobj.kset = kset_parent;
 	kobject_init_and_add(&my_kobj.kobj,&ktype,NULL,"%s", __func__);
+
+	kobject_set_name(&kset_child.kobj,"kset_child");
+	kset_child.kobj.kset = kset_parent;
+	kset_child.kobj.ktype = &ktype;
+	kset_register(&kset_child);
 	return 0;
 }
 
@@ -131,6 +138,7 @@ void cleanup_module(void)
 	printk("kset test exit.\n");
 	kobject_del(&my_kobj.kobj);
 	kset_unregister(kset_parent);
+	kset_unregister(&kset_child);
 }
 
 MODULE_AUTHOR("kabir");
