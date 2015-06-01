@@ -81,21 +81,60 @@ struct kobj_type ktype =
 	.default_attrs = kobject_def_attrs,
 };
 
+static int kset_filter(struct kset *kset, struct kobject *kobj)
+{
+    printk("UEVENT: filter. kobj %s.\n",kobj->name);
+    return 1;
+}
+ 
+static const char *kset_name(struct kset *kset, struct kobject *kobj)
+{
+    static char buf[20];
+    printk("UEVENT: name. kobj %s.\n",kobj->name);
+    sprintf(buf,"%s","kset_test");
+    return buf;
+}
+ 
+static int kset_uevent(struct kset *kset, struct kobject *kobj,
+                struct kobj_uevent_env *env)
+{
+    int i = 0;
+    printk("UEVENT: uevent. kobj %s.\n",kobj->name);
+ 
+    while( i< env->envp_idx){
+        printk("%s.\n",env->envp[i]);
+        i++;
+    }
+ 
+    return 0;
+}
+ 
+static struct kset_uevent_ops uevent_ops =
+{
+    .filter = kset_filter,
+    .name   = kset_name,
+    .uevent = kset_uevent,
+};
+ 
+static struct kset *kset_parent;
 int init_module(void)
 {
-	printk("kboject test init.\n");
+	printk("kset test init.\n");
+	kset_parent = kset_create_and_add("kset_parent", &uevent_ops, NULL);
+	my_kobj.kobj.kset = kset_parent;
 	kobject_init_and_add(&my_kobj.kobj,&ktype,NULL,"%s", __func__);
 	return 0;
 }
 
 void cleanup_module(void)
 {
-	printk("kobject test exit.\n");
+	printk("kset test exit.\n");
 	kobject_del(&my_kobj.kobj);
+	kset_unregister(kset_parent);
 }
 
 MODULE_AUTHOR("kabir");
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("kobject sample");
+MODULE_DESCRIPTION("kset sample");
 MODULE_VERSION("v1.0");
 MODULE_ALIAS("kset and kobject");
